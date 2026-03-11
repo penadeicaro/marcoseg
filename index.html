@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Marco — Profissional de Segurança</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1c2c;
+    --steel: #1e3a52;
+    --gold: #c8922a;
+    --gold-light: #e8b04a;
+    --silver: #8fa8bc;
+    --white: #f0f4f7;
+    --muted: #5a7a92;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--navy);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ══════════════════════════════
+     PHOTO STAGE — fixed behind everything
+     The photo sits fixed in the viewport.
+     Hero text scrolls over it, then the
+     main content slides up and covers it.
+  ══════════════════════════════ */
+  .photo-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    will-change: transform;
+  }
+
+  /* Desktop: wide photo */
+  .photo-stage-img {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    /* JS will swap src via data attrs */
+    background-image: url('perfilwide.jpg');
+    /* subtle scale for parallax feel — JS drives this */
+    transform: scale(1.08);
+    transform-origin: center center;
+    transition: transform 0.05s linear;
+  }
+
+  /* Overlay: dark vignette so text is always readable */
+  .photo-stage-overlay {
+    position: absolute; inset: 0;
+    /* Desktop: strong left fade for text area */
+    background:
+      linear-gradient(to right,
+        rgba(11,28,44,0.93) 0%,
+        rgba(11,28,44,0.72) 28%,
+        rgba(11,28,44,0.30) 58%,
+        rgba(11,28,44,0.08) 100%
+      ),
+      linear-gradient(to top,
+        rgba(11,28,44,0.85) 0%,
+        transparent 35%
+      );
+  }
+
+  /* ══════════════════════════════
+     HERO — transparent, sits above photo
+  ══════════════════════════════ */
+  .hero {
+    position: relative;
+    z-index: 2;
+    height: 100svh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .badge-line {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 4px; z-index: 10;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+  }
+
+  .hero-pattern {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(200,146,42,0.025) 40px, rgba(200,146,42,0.025) 41px),
+      repeating-linear-gradient(0deg,  transparent, transparent 40px, rgba(200,146,42,0.025) 40px, rgba(200,146,42,0.025) 41px);
+  }
+
+  .hero-inner {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 1200px;
+    margin: 0 auto; padding: 0 40px;
+    /* Text fades out as user scrolls — driven by JS */
+    transition: opacity 0.1s linear, transform 0.1s linear;
+    will-change: opacity, transform;
+  }
+
+  .hero-text { padding-bottom: 60px; }
+
+  .hero-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 12px;
+    animation: fadeUp 0.9s 0.1s ease both;
+  }
+
+  .hero-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 10vw, 120px);
+    line-height: 0.88; color: var(--white); letter-spacing: 2px;
+    animation: fadeUp 0.9s 0.2s ease both;
+  }
+
+  .hero-name span { color: var(--gold); }
+
+  .hero-title {
+    margin-top: 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(13px, 2vw, 18px); font-weight: 400;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--silver);
+    border-left: 3px solid var(--gold); padding-left: 14px;
+    animation: fadeUp 0.9s 0.3s ease both;
+  }
+
+  .hero-years {
+    margin-top: 36px;
+    display: flex; gap: 32px; align-items: stretch;
+    animation: fadeUp 0.9s 0.4s ease both;
+  }
+
+  .year-stat strong {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 56px);
+    color: var(--gold); line-height: 1;
+  }
+
+  .year-stat span {
+    font-size: 11px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  .divider-year {
+    width: 1px; background: rgba(200,146,42,0.3); align-self: stretch;
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 2; display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    opacity: 0.35; animation: bounce 2.2s infinite;
+  }
+
+  .scroll-arrow {
+    width: 18px; height: 18px;
+    border-right: 2px solid var(--gold);
+    border-bottom: 2px solid var(--gold);
+    transform: rotate(45deg);
+  }
+
+  /* ══════════════════════════════
+     MAIN CONTENT
+     Sits above photo-stage via z-index.
+     Solid background so it fully covers photo when scrolled into view.
+  ══════════════════════════════ */
+  .main-content {
+    position: relative;
+    z-index: 5;
+    background-color: var(--navy);
+    /* top rounded corners to soften the slide-over-photo moment */
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 40px rgba(0,0,0,0.6);
+    margin-top: -32px; /* slight overlap with hero bottom */
+  }
+
+  .content-wrap {
+    max-width: 1200px; margin: 0 auto; padding: 0 40px;
+  }
+
+  section {
+    padding: 64px 0;
+    border-bottom: 1px solid rgba(200,146,42,0.08);
+  }
+
+  .section-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 40px;
+  }
+
+  .section-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px; color: var(--gold); opacity: 0.6;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px; letter-spacing: 3px; color: var(--white);
+  }
+
+  .section-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(200,146,42,0.35), transparent);
+  }
+
+  /* ══════════════════════════════
+     SOBRE
+  ══════════════════════════════ */
+  .sobre-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 52px;
+    align-items: start;
+  }
+
+  .sobre-photo-wrap {
+    position: relative;
+  }
+
+  .sobre-photo-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -8px -8px 8px 8px;
+    border: 1px solid rgba(200,146,42,0.22);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .sobre-photo-wrap::after {
+    content: '';
+    position: absolute;
+    top: -8px; left: 8px;
+    width: 40px; height: 3px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+
+  .sobre-photo {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    filter: grayscale(8%) brightness(0.92) contrast(1.04);
+    -webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+  }
+
+  .sobre-photo-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 7;
+    border-radius: 4px;
+    border: 2px dashed rgba(200,146,42,0.35);
+    background: rgba(30,58,82,0.35);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px; color: var(--muted);
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  .sobre-photo-placeholder svg { opacity: 0.35; }
+
+  .sobre-text-col { padding-top: 4px; }
+
+  .gold-divider {
+    width: 50px; height: 3px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    margin-bottom: 20px;
+  }
+
+  .sobre-text {
+    font-size: 15px; line-height: 1.85;
+    color: rgba(240,244,247,0.78);
+  }
+
+  .sobre-text + .sobre-text { margin-top: 16px; }
+  .sobre-text strong { color: var(--gold-light); font-weight: 500; }
+
+  /* ══════════════════════════════
+     EXPERIÊNCIA
+  ══════════════════════════════ */
+  .exp-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+
+  .exp-card {
+    background: rgba(30,58,82,0.28);
+    border: 1px solid rgba(200,146,42,0.14);
+    border-left: 3px solid var(--gold);
+    padding: 28px 24px;
+    border-radius: 0 8px 8px 0;
+    transition: background 0.2s;
+  }
+
+  .exp-card:hover { background: rgba(30,58,82,0.48); }
+  .exp-icon { font-size: 30px; margin-bottom: 12px; }
+
+  .exp-role {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 700;
+    letter-spacing: 1px; color: var(--white); text-transform: uppercase;
+  }
+
+  .exp-duration {
+    display: inline-block; margin-top: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px; letter-spacing: 2px; color: var(--gold);
+    background: rgba(200,146,42,0.1);
+    padding: 3px 10px; border-radius: 2px;
+  }
+
+  .exp-desc {
+    margin-top: 14px; font-size: 14px; line-height: 1.75;
+    color: rgba(240,244,247,0.62);
+  }
+
+  /* ══════════════════════════════
+     COMPETÊNCIAS
+  ══════════════════════════════ */
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+
+  .skill-item {
+    background: rgba(30,58,82,0.22);
+    border: 1px solid rgba(200,146,42,0.11);
+    border-radius: 8px; padding: 18px 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .skill-item:hover { border-color: rgba(200,146,42,0.3); }
+
+  .skill-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold); margin-top: 5px; flex-shrink: 0;
+  }
+
+  .skill-text { font-size: 13px; line-height: 1.55; color: rgba(240,244,247,0.8); }
+
+  /* ══════════════════════════════
+     PERFIL
+  ══════════════════════════════ */
+  .profile-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+
+  .tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--gold-light);
+    border: 1px solid rgba(200,146,42,0.35);
+    padding: 8px 16px; border-radius: 4px;
+    background: rgba(200,146,42,0.06);
+    transition: background 0.2s;
+  }
+
+  .tag:hover { background: rgba(200,146,42,0.14); }
+
+  /* ══════════════════════════════
+     CONTATO
+  ══════════════════════════════ */
+  .contact-banner {
+    background: linear-gradient(135deg, var(--steel), #0f2a3d);
+    border-top: 1px solid rgba(200,146,42,0.2);
+    padding: 72px 40px; text-align: center;
+  }
+
+  .contact-banner h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 5vw, 52px); letter-spacing: 5px;
+    color: var(--white); margin-bottom: 12px;
+  }
+
+  .contact-banner p {
+    font-size: 15px; color: var(--silver);
+    margin-bottom: 36px; line-height: 1.7;
+  }
+
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: #25D366; color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 18px 40px; border-radius: 50px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    border: none; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.35);
+  }
+
+  .cta-btn:hover {
+    background: #1ebe5d;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(37,211,102,0.5);
+  }
+  .cta-btn:active { transform: scale(0.97); }
+
+  .cta-btn svg { flex-shrink: 0; }
+
+  /* ══════════════════════════════
+     FLOATING WHATSAPP BUTTON
+  ══════════════════════════════ */
+  .whatsapp-fab {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 100;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: #25D366;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.5), 0 2px 8px rgba(0,0,0,0.3);
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    /* pulse ring */
+    animation: fabPulse 2.5s ease-in-out infinite;
+  }
+
+  .whatsapp-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 28px rgba(37,211,102,0.65), 0 2px 8px rgba(0,0,0,0.3);
+    animation: none;
+  }
+
+  .whatsapp-fab:active { transform: scale(0.95); }
+
+  @keyframes fabPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.5), 0 0 0 0 rgba(37,211,102,0.4); }
+    50%       { box-shadow: 0 4px 20px rgba(37,211,102,0.5), 0 0 0 10px rgba(37,211,102,0); }
+  }
+
+  /* ══════════════════════════════
+     FOOTER
+  ══════════════════════════════ */
+  footer {
+    background: #070f18; padding: 28px 40px; text-align: center;
+  }
+
+  footer p {
+    font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); opacity: 0.45;
+  }
+
+  /* ══════════════════════════════
+     ANIMATIONS
+  ══════════════════════════════ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%       { transform: translateX(-50%) translateY(8px); }
+  }
+
+  .fade-in {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ══════════════════════════════
+     MOBILE (≤600px)
+  ══════════════════════════════ */
+  @media (max-width: 600px) {
+    /* portrait photo on mobile */
+    .photo-stage-img { background-image: url('perfil.png'); background-position: center top; }
+
+    /* overlay: stronger bottom-up dark for portrait */
+    .photo-stage-overlay {
+      background:
+        linear-gradient(to top,
+          rgba(11,28,44,0.95) 0%,
+          rgba(11,28,44,0.65) 40%,
+          rgba(11,28,44,0.15) 75%,
+          rgba(11,28,44,0.05) 100%
+        );
+    }
+
+    .hero { height: 100svh; }
+    .hero-inner { padding: 0 20px; }
+    .hero-text { padding-bottom: 52px; }
+    .hero-years { gap: 20px; }
+
+    .main-content { border-radius: 12px 12px 0 0; }
+    .content-wrap { padding: 0 20px; }
+    section { padding: 48px 0; }
+    .sobre-layout { grid-template-columns: 1fr; gap: 28px; }
+    .sobre-photo-wrap { max-width: 180px; margin: 0 auto; }
+    .exp-grid { grid-template-columns: 1fr; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .contact-banner { padding: 48px 20px; }
+    footer { padding: 24px 20px; }
+  }
+
+  /* ══════════════════════════════
+     TABLET (≤900px)
+  ══════════════════════════════ */
+  @media (min-width: 601px) and (max-width: 900px) {
+    .hero-inner { padding: 0 24px; }
+    .content-wrap { padding: 0 24px; }
+    .sobre-layout { grid-template-columns: 180px 1fr; gap: 36px; }
+    .exp-grid { grid-template-columns: 1fr; }
+    .skills-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 380px) {
+    .hero-name { font-size: 56px; }
+    .year-stat strong { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PHOTO STAGE: fixed wallpaper, always behind everything -->
+<div class="photo-stage">
+  <div class="photo-stage-img" id="photoBg"></div>
+  <div class="photo-stage-overlay"></div>
+</div>
+
+<!-- BADGE LINE -->
+<div class="badge-line"></div>
+
+<!-- HERO: transparent, text scrolls away exposing photo below -->
+<div class="hero">
+  <div class="hero-pattern"></div>
+
+  <div class="hero-inner" id="heroInner">
+    <div class="hero-text">
+      <div class="hero-label">Currículo Profissional</div>
+      <div class="hero-name">Marco<br><span>Antônio</span></div>
+      <div class="hero-title">Agente de Segurança &amp; Controle de Acesso</div>
+      <div class="hero-years">
+        <div class="year-stat">
+          <strong>20+</strong>
+          <span>Anos em<br>Segurança</span>
+        </div>
+        <div class="divider-year"></div>
+        <div class="year-stat">
+          <strong>10+</strong>
+          <span>Anos em<br>Portaria</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint"><div class="scroll-arrow"></div></div>
+</div>
+
+<!-- MAIN CONTENT: solid background, slides up over photo on scroll -->
+<div class="main-content">
+  <div class="content-wrap">
+
+    <!-- SOBRE -->
+    <section class="fade-in">
+      <div class="section-header">
+        <span class="section-number">01</span>
+        <h2 class="section-title">Sobre Mim</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="sobre-layout">
+        <div class="sobre-photo-wrap">
+          <img
+            src="perfil.png"
+            alt="Marco Antônio"
+            class="sobre-photo"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="sobre-photo-placeholder" style="display:none;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+            perfil.png
+          </div>
+        </div>
+        <div class="sobre-text-col">
+          <div class="gold-divider"></div>
+          <p class="sobre-text">
+            Profissional formado pela <strong>prática e pela experiência</strong>. Minha trajetória começou há mais de duas décadas na área de segurança e vigilância patrimonial — um campo que exige responsabilidade constante, atenção aos detalhes e comprometimento absoluto com a proteção de pessoas e patrimônios.
+          </p>
+          <p class="sobre-text">
+            Ao longo dos anos, desenvolvi forte capacidade de <strong>observação, prevenção de riscos</strong> e resposta rápida a situações inesperadas. Trabalhar nessa área significa estar sempre alerta, identificar comportamentos suspeitos e agir com equilíbrio e profissionalismo para manter ambientes seguros.
+          </p>
+          <p class="sobre-text">
+            Durante essa jornada, também atuei por mais de 10 anos em portaria e controle de acesso — função essencial para a organização e segurança de empresas, condomínios e instituições, exigindo <strong>disciplina, comunicação e postura profissional</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIÊNCIA -->
+    <section class="fade-in">
+      <div class="section-header">
+        <span class="section-number">02</span>
+        <h2 class="section-title">Experiência</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="exp-grid">
+        <div class="exp-card">
+          <div class="exp-icon">🛡️</div>
+          <div class="exp-role">Vigilante Patrimonial</div>
+          <div class="exp-duration">+ de 20 Anos</div>
+          <p class="exp-desc">Atuação em segurança e vigilância patrimonial com foco em prevenção de riscos, monitoramento de ambientes, rondas e resposta a ocorrências. Responsável pela proteção de pessoas, bens e instalações com disciplina e profissionalismo.</p>
+        </div>
+        <div class="exp-card">
+          <div class="exp-icon">🏢</div>
+          <div class="exp-role">Porteiro / Controlador de Acesso</div>
+          <div class="exp-duration">+ de 10 Anos</div>
+          <p class="exp-desc">Recepção de visitantes, controle de entrada e saída de pessoas e veículos, orientação ao público e apoio à segurança do local. Atuação em empresas, condomínios e instituições com postura cordial e profissional.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPETÊNCIAS -->
+    <section class="fade-in">
+      <div class="section-header">
+        <span class="section-number">03</span>
+        <h2 class="section-title">Competências</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-item"><div class="skill-dot"></div><span class="skill-text">Alto senso de responsabilidade e confiabilidade</span></div>
+        <div class="skill-item"><div class="skill-dot"></div><span class="skill-text">Disciplina e comprometimento com rotinas de segurança</span></div>
+        <div class="skill-item"><div class="skill-dot"></div><span class="skill-text">Calma e equilíbrio em situações de pressão</span></div>
+        <div class="skill-item"><div class="skill-dot"></div><span class="skill-text">Boa comunicação com clientes e equipes</span></div>
+        <div class="skill-item"><div class="skill-dot"></div><span class="skill-text">Atenção a procedimentos e protocolos</span></div>
+        <div class="skill-item"><div class="skill-dot"></div><span class="skill-text">Prevenção e identificação de riscos</span></div>
+      </div>
+    </section>
+
+    <!-- PERFIL -->
+    <section class="fade-in">
+      <div class="section-header">
+        <span class="section-number">04</span>
+        <h2 class="section-title">Perfil</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="profile-tags">
+        <span class="tag">Responsável</span>
+        <span class="tag">Confiável</span>
+        <span class="tag">Disciplinado</span>
+        <span class="tag">Comunicativo</span>
+        <span class="tag">Atento</span>
+        <span class="tag">Profissional</span>
+        <span class="tag">Organizado</span>
+        <span class="tag">Dedicado</span>
+      </div>
+      <p class="sobre-text">
+        Busco continuar contribuindo com <strong>ambientes seguros, organizados e bem administrados</strong>, colocando minha experiência a serviço de empresas, condomínios ou instituições que valorizem profissionalismo, confiança e responsabilidade.
+      </p>
+    </section>
+
+  </div>
+
+  <!-- CONTATO -->
+  <div class="contact-banner fade-in">
+    <h2>VAMOS CONVERSAR</h2>
+    <p>Disponível para oportunidades em segurança patrimonial,<br>controle de acesso e portaria.</p>
+    <a class="cta-btn"
+       href="https://wa.me/5551984320993?text=Olá%20Marco%2C%20vi%20seu%20currículo%20e%20gostaria%20de%20conversar!"
+       target="_blank">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      Entrar em Contato
+    </a>
+  </div>
+
+  <footer>
+    <p>Marco Antônio · Agente de Segurança Patrimonial</p>
+  </footer>
+</div><!-- /main-content -->
+
+<!-- FLOATING WHATSAPP BUTTON -->
+<a class="whatsapp-fab"
+   href="https://wa.me/5551984320993?text=Olá%20Marco%2C%20vi%20seu%20currículo%20e%20gostaria%20de%20conversar!"
+   target="_blank"
+   aria-label="Contato via WhatsApp">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+  const heroInner  = document.getElementById('heroInner');
+  const photoBg    = document.getElementById('photoBg');
+  const heroHeight = () => window.innerHeight;
+
+  // ── Parallax + hero text fade on scroll ──────────────────────────
+  function onScroll() {
+    const sy = window.scrollY;
+    const vh = heroHeight();
+
+    // How far through the hero we've scrolled (0 → 1)
+    const progress = Math.min(sy / vh, 1);
+
+    // 1. Hero text: fade out and drift up as user scrolls
+    //    Starts fading at 15% scroll, fully gone at 70%
+    const textFade  = Math.max(0, 1 - (progress - 0.15) / 0.55);
+    const textShift = progress * 60; // px upward drift
+    heroInner.style.opacity   = textFade;
+    heroInner.style.transform = `translateY(-${textShift}px)`;
+
+    // 2. Photo parallax: photo moves up at ~40% of scroll speed
+    //    creating depth — photo lingers as text flies away
+    const parallaxY = sy * 0.38;
+    photoBg.style.transform = `scale(1.08) translateY(${parallaxY * 0.5}px)`;
+    // We counteract the scale offset so it stays centered:
+    // actual CSS translateY is divided by scale factor ≈1.08
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // ── Fade-in sections ─────────────────────────────────────────────
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.08 }
+  );
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
