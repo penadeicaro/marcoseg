@@ -325,6 +325,104 @@
   }
 
   /* ══════════════════════════════
+     HISTÓRICO PROFISSIONAL (timeline)
+  ══════════════════════════════ */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tl-item {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 28px;
+  }
+
+  /* Left column: dot + line */
+  .tl-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 20px;
+  }
+
+  .tl-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--navy);
+    box-shadow: 0 0 0 2px rgba(200,146,42,0.4);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .tl-line {
+    width: 2px;
+    flex: 1;
+    background: linear-gradient(to bottom, rgba(200,146,42,0.5), rgba(200,146,42,0.1));
+    margin-top: 4px;
+    border-radius: 2px;
+    min-height: 16px;
+  }
+
+  /* Last item hides the line */
+  .tl-item:last-of-type .tl-line,
+  .tl-extra .tl-item:last-child .tl-line {
+    display: none;
+  }
+
+  /* Right column: text */
+  .tl-text { flex: 1; }
+
+  .tl-company {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px; font-weight: 700;
+    letter-spacing: 0.5px; color: var(--white);
+    line-height: 1.2;
+  }
+
+  .tl-role {
+    margin-top: 4px;
+    font-size: 13px; color: var(--silver);
+  }
+
+  /* Expandable hidden items */
+  .tl-extra {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.5s ease;
+  }
+
+  .tl-extra.open { max-height: 2000px; }
+
+  /* Toggle button */
+  .tl-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 4px; margin-left: 40px;
+    background: transparent;
+    border: 1px solid rgba(200,146,42,0.35);
+    color: var(--gold-light);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 10px 20px; border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .tl-toggle:hover { background: rgba(200,146,42,0.1); border-color: var(--gold); }
+
+  .tl-toggle-icon {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-style: normal;
+  }
+
+  .tl-toggle.open .tl-toggle-icon { transform: rotate(180deg); }
+
+  /* ══════════════════════════════
      COMPETÊNCIAS
   ══════════════════════════════ */
   .skills-grid {
@@ -600,11 +698,90 @@
       </div>
     </section>
 
-    <!-- EXPERIÊNCIA -->
+    <!-- HISTÓRICO PROFISSIONAL -->
     <section class="fade-in">
       <div class="section-header">
         <span class="section-number">02</span>
-        <h2 class="section-title">Experiência</h2>
+        <h2 class="section-title">Histórico Profissional</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="timeline">
+
+        <!-- TOP 3 — sempre visíveis -->
+        <div class="tl-item">
+          <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-text"><div class="tl-company">Dielo – Serviços de Vigilância Ltda</div><div class="tl-role">Vigilante</div></div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-text"><div class="tl-company">Embrasil Empresa Brasileira de Segurança Ltda</div><div class="tl-role">Agente de Proteção de Aeroporto</div></div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-text"><div class="tl-company">IC – Segurança Privada do Rio Grande do Sul Ltda</div><div class="tl-role">Agente de Proteção de Aeroporto</div></div>
+        </div>
+
+        <!-- Restante — expandível -->
+        <div class="tl-extra" id="tlExtra">
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-text"><div class="tl-company">Prosegur Brasil S/A Transportadora de Valores</div><div class="tl-role">Agente de Proteção de Aeroporto</div></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-text"><div class="tl-company">W10 Gerenciamento de Risco Ltda</div><div class="tl-role">Porteiro (Hotel)</div></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-text"><div class="tl-company">Empresa de Vigilância Cindapa do Brasil Ltda</div><div class="tl-role">Vigilante</div></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-text"><div class="tl-company">Pretoriano – Portaria e Zeladoria Ltda</div><div class="tl-role">Porteiro</div></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-text"><div class="tl-company">C. Eduardo Marques da Silva</div><div class="tl-role">Porteiro</div></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-text"><div class="tl-company">Massa Falida Vigilância Pedrozo Ltda</div><div class="tl-role">Agente de Proteção de Aeroporto</div></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-text"><div class="tl-company">Mobra Serviços de Vigilância Ltda (Massa Falida)</div><div class="tl-role">Agente de Proteção de Aeroporto</div></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-marker"><div class="tl-dot"></div></div>
+            <div class="tl-text"><div class="tl-company">NPA Engenharia e Construções Ltda</div><div class="tl-role">Auxiliar de Escritório em Geral</div></div>
+          </div>
+
+        </div><!-- /tl-extra -->
+
+        <button class="tl-toggle" id="tlToggle" onclick="toggleTimeline()">
+          <i class="tl-toggle-icon">▼</i>
+          <span id="tlToggleLabel">Ver todas as experiências</span>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- EXPERIÊNCIA -->
+    <section class="fade-in">
+      <div class="section-header">
+        <span class="section-number">03</span>
+        <h2 class="section-title">Áreas de Atuação</h2>
         <div class="section-line"></div>
       </div>
       <div class="exp-grid">
@@ -626,7 +803,7 @@
     <!-- COMPETÊNCIAS -->
     <section class="fade-in">
       <div class="section-header">
-        <span class="section-number">03</span>
+        <span class="section-number">04</span>
         <h2 class="section-title">Competências</h2>
         <div class="section-line"></div>
       </div>
@@ -643,7 +820,7 @@
     <!-- PERFIL -->
     <section class="fade-in">
       <div class="section-header">
-        <span class="section-number">04</span>
+        <span class="section-number">05</span>
         <h2 class="section-title">Perfil</h2>
         <div class="section-line"></div>
       </div>
@@ -719,6 +896,16 @@
     photoBg.style.transform = `scale(1.08) translateY(${parallaxY * 0.5}px)`;
     // We counteract the scale offset so it stays centered:
     // actual CSS translateY is divided by scale factor ≈1.08
+  }
+
+  // ── Timeline toggle ───────────────────────────────────────────────
+  function toggleTimeline() {
+    const extra  = document.getElementById('tlExtra');
+    const btn    = document.getElementById('tlToggle');
+    const label  = document.getElementById('tlToggleLabel');
+    const isOpen = extra.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    label.textContent = isOpen ? 'Mostrar menos' : 'Ver todas as experiências';
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
